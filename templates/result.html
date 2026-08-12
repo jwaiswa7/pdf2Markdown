@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Converted Markdown</title>
+  <title>Simple PDF -> Markdown</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -48,6 +48,19 @@
       margin: 0 auto;
       padding: 2.5rem 2.5rem;
     }
+    .meta {
+      max-width: 860px;
+      margin: 0 auto 1rem;
+      color: #555;
+      font-size: .8rem;
+      line-height: 1.6;
+    }
+    .meta a {
+      color: #357abd;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .meta a:hover { text-decoration: underline; }
 
     /* Rendered markdown styles */
     .md-body h1, .md-body h2, .md-body h3,
@@ -110,6 +123,12 @@
     <button class="secondary" id="toggle-raw-btn" onclick="toggleRaw()">Show Raw Markdown</button>
     <button class="secondary" onclick="copyMd()">📋 Copy Markdown</button>
     <button class="secondary" onclick="downloadMd()">⬇ Download .md</button>
+  </div>
+
+  <div class="meta">
+    Simple PDF -> Markdown keeps conversions for 10 minutes and then deletes them. If this was useful, you can
+    <a href="https://buymeacoffee.com/jwaiswa" target="_blank" rel="noreferrer">buy me a coffee</a>
+    or email <a href="mailto:jwaiswa7@gmail.com">jwaiswa7@gmail.com</a>.
   </div>
 
   <div class="card">

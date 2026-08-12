@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PDF to Markdown Converter</title>
+  <title>Simple PDF -> Markdown</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -22,12 +22,30 @@
       box-shadow: 0 4px 24px rgba(0,0,0,.08);
       padding: 3rem 2.5rem;
       width: 100%;
-      max-width: 480px;
+      max-width: 560px;
       text-align: center;
     }
 
     h1 { font-size: 1.8rem; margin-bottom: .5rem; color: #111; }
     p.sub { color: #666; margin-bottom: 2rem; font-size: .95rem; }
+    .note {
+      color: #555;
+      font-size: .8rem;
+      line-height: 1.6;
+      margin-top: 1.5rem;
+      text-align: left;
+    }
+    .note ul {
+      margin: 0 0 .75rem 1.1rem;
+      padding: 0;
+    }
+    .note li { margin-bottom: .4rem; }
+    .note a {
+      color: #357abd;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .note a:hover { text-decoration: underline; }
 
     .drop-zone {
       border: 2px dashed #c5d0de;
@@ -82,8 +100,8 @@
 </head>
 <body>
   <div class="card">
-    <h1>📄 PDF → Markdown</h1>
-    <p class="sub">Upload a PDF and get clean Markdown instantly.</p>
+    <h1>Simple PDF -> Markdown</h1>
+    <p class="sub">Upload a PDF and get clean Markdown without extra setup.</p>
     <p class="sub">Maximum file size: 1 MB.</p>
 
     {% if error %}
@@ -101,7 +119,17 @@
       <button type="submit" id="submit-btn">Convert to Markdown</button>
       <div class="spinner" id="spinner"></div>
     </form>
-  </div>
+    <div class="note">
+      <ul>
+        <li>Supports PDFs with text content. Scanned PDFs (images) may not convert well.</li>
+        <li>Markdown output is optimized for readability and simplicity.</li>
+        <li>Your uploaded PDF and converted markdown are automatically deleted after 10 minutes.</li>
+        <li>If you found this useful, you can <a href="https://buymeacoffee.com/jwaiswa" target="_blank"
+            rel="noreferrer">buy me a coffee</a>.</li>
+      </ul>
+      <p>Built by Joshua, email: <a href="mailto:jwaiswa7@gmail.com">jwaiswa7@gmail.com</a>.</p>
+    </div>
+</div>
 
   <script>
       const MAX_FILE_SIZE_BYTES = 1 * 1024 * 1024;
