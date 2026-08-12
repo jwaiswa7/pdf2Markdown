@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PDF to Markdown Converter</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f4f6f8;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,.08);
+      padding: 3rem 2.5rem;
+      width: 100%;
+      max-width: 480px;
+      text-align: center;
+    }
+
+    h1 { font-size: 1.8rem; margin-bottom: .5rem; color: #111; }
+    p.sub { color: #666; margin-bottom: 2rem; font-size: .95rem; }
+
+    .drop-zone {
+      border: 2px dashed #c5d0de;
+      border-radius: 8px;
+      padding: 2.5rem 1rem;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+    .drop-zone:hover, .drop-zone.drag-over {
+      border-color: #4a90e2;
+      background: #f0f6ff;
+    }
+    .drop-zone input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .drop-zone .icon { font-size: 2.5rem; margin-bottom: .5rem; }
+    .drop-zone .label { color: #555; font-size: .95rem; }
+    .drop-zone .label strong { color: #4a90e2; }
+    #file-name { font-size: .85rem; color: #888; margin-top: .4rem; }
+
+    button[type="submit"] {
+      background: #4a90e2;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: .85rem 2rem;
+      font-size: 1rem;
+      cursor: pointer;
+      width: 100%;
+      transition: background .2s;
+    }
+    button[type="submit"]:hover { background: #357abd; }
+    button[type="submit"]:disabled { background: #a0bde8; cursor: default; }
+
+    .error {
+      background: #fff0f0;
+      color: #c0392b;
+      border: 1px solid #f5c6cb;
+      border-radius: 6px;
+      padding: .75rem 1rem;
+      margin-bottom: 1.2rem;
+      font-size: .9rem;
+    }
+
+    .spinner { display: none; margin: 1rem auto 0; width: 28px; height: 28px;
+      border: 3px solid #e0e0e0; border-top-color: #4a90e2;
+      border-radius: 50%; animation: spin .7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>📄 PDF → Markdown</h1>
+    <p class="sub">Upload a PDF and get clean Markdown instantly.</p>
+
+    {% if error %}
+    <div class="error">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST" action="/convert" enctype="multipart/form-data" id="upload-form">
+      <div class="drop-zone" id="drop-zone">
+        <input type="file" name="pdf" accept="application/pdf" id="file-input" required />
+        <div class="icon">☁️</div>
+        <div class="label">Drag &amp; drop your PDF here or <strong>browse</strong></div>
+        <div id="file-name">No file selected</div>
+      </div>
+
+      <button type="submit" id="submit-btn">Convert to Markdown</button>
+      <div class="spinner" id="spinner"></div>
+    </form>
+  </div>
+
+  <script>
+    const input = document.getElementById("file-input");
+    const fileNameEl = document.getElementById("file-name");
+    const dropZone = document.getElementById("drop-zone");
+    const form = document.getElementById("upload-form");
+    const spinner = document.getElementById("spinner");
+    const submitBtn = document.getElementById("submit-btn");
+
+    input.addEventListener("change", () => {
+      fileNameEl.textContent = input.files[0]?.name || "No file selected";
+    });
+
+    ["dragover", "dragenter"].forEach(e => dropZone.addEventListener(e, ev => {
+      ev.preventDefault(); dropZone.classList.add("drag-over");
+    }));
+    ["dragleave", "drop"].forEach(e => dropZone.addEventListener(e, () => {
+      dropZone.classList.remove("drag-over");
+    }));
+
+    form.addEventListener("submit", () => {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Converting…";
+      spinner.style.display = "block";
+    });
+  </script>
+</body>
+</html>

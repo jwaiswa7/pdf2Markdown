@@ -1,0 +1,3 @@
+flask>=3.0
+pymupdf4llm>=0.0.17
+markdown>=3.6
