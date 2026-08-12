@@ -4,10 +4,11 @@ import time
 from pathlib import Path
 import markdown
 import pymupdf4llm
+from werkzeug.exceptions import RequestEntityTooLarge
 from flask import Flask, request, redirect, url_for, render_template, abort
 
 app = Flask(__name__)
-app.config["MAX_CONTENT_LENGTH"] = 20 * 1024 * 1024  # 20 MB limit
+app.config["MAX_CONTENT_LENGTH"] = 1 * 1024 * 1024  # 1 MB limit
 
 CONVERSION_TTL_SECONDS = 10 * 60
 CONVERSIONS_DIR = Path("/tmp/pdf2md-conversions")
@@ -41,6 +42,11 @@ def load_conversion(conversion_id: str) -> str | None:
         return None
 
     return file_path.read_text(encoding="utf-8")
+
+
+@app.errorhandler(RequestEntityTooLarge)
+def handle_file_too_large(_error):
+    return render_template("index.html", error="File too large. Please upload a PDF smaller than 1 MB."), 413
 
 
 @app.route("/")

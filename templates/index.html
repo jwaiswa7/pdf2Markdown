@@ -84,6 +84,7 @@
   <div class="card">
     <h1>📄 PDF → Markdown</h1>
     <p class="sub">Upload a PDF and get clean Markdown instantly.</p>
+    <p class="sub">Maximum file size: 1 MB.</p>
 
     {% if error %}
     <div class="error">{{ error }}</div>
@@ -103,6 +104,7 @@
   </div>
 
   <script>
+      const MAX_FILE_SIZE_BYTES = 1 * 1024 * 1024;
     const input = document.getElementById("file-input");
     const fileNameEl = document.getElementById("file-name");
     const dropZone = document.getElementById("drop-zone");
@@ -111,7 +113,23 @@
     const submitBtn = document.getElementById("submit-btn");
 
     input.addEventListener("change", () => {
-      fileNameEl.textContent = input.files[0]?.name || "No file selected";
+      const selectedFile = input.files[0];
+      if (!selectedFile) {
+        fileNameEl.textContent = "No file selected";
+        input.setCustomValidity("");
+        return;
+      }
+
+      if (selectedFile.size > MAX_FILE_SIZE_BYTES) {
+        input.value = "";
+        input.setCustomValidity("File too large. Please upload a PDF smaller than 1 MB.");
+        input.reportValidity();
+        fileNameEl.textContent = "No file selected";
+        return;
+      }
+
+      input.setCustomValidity("");
+      fileNameEl.textContent = selectedFile.name;
     });
 
     ["dragover", "dragenter"].forEach(e => dropZone.addEventListener(e, ev => {
@@ -122,6 +140,18 @@
     }));
 
     form.addEventListener("submit", () => {
+      const selectedFile = input.files[0];
+      if (!selectedFile) {
+        return;
+      }
+
+      if (selectedFile.size > MAX_FILE_SIZE_BYTES) {
+        input.setCustomValidity("File too large. Please upload a PDF smaller than 1 MB.");
+        input.reportValidity();
+        return;
+      }
+
+      input.setCustomValidity("");
       submitBtn.disabled = true;
       submitBtn.textContent = "Converting…";
       spinner.style.display = "block";
