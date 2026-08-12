@@ -1,0 +1,32 @@
+service: pdf2md
+
+image: jwaiswa/pdf2md
+
+servers:
+  web:
+    - 144.91.116.81
+
+proxy:
+  app_port: 8000
+  ssl: true
+  host: convert.schedulze.com
+  healthcheck:
+    path: /
+    interval: 3
+    timeout: 5
+
+registry:
+  username: jwaiswa
+  password:
+    - KAMAL_REGISTRY_PASSWORD
+
+builder:
+  arch: amd64
+
+env:
+  clear:
+    PORT: 8000
+
+ssh:
+  user: deploy
+  port: 5522
