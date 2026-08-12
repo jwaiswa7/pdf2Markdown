@@ -1,5 +1,7 @@
 import uuid
 import os
+import time
+from pathlib import Path
 import markdown
 import pymupdf4llm
 from flask import Flask, request, redirect, url_for, render_template, abort
@@ -7,17 +9,49 @@ from flask import Flask, request, redirect, url_for, render_template, abort
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 20 * 1024 * 1024  # 20 MB limit
 
-# In-memory store: {conversion_id: markdown_text}
-conversions: dict[str, str] = {}
+CONVERSION_TTL_SECONDS = 10 * 60
+CONVERSIONS_DIR = Path("/tmp/pdf2md-conversions")
+
+
+def cleanup_expired_conversions() -> None:
+    now = time.time()
+    if not CONVERSIONS_DIR.exists():
+        return
+
+    for file_path in CONVERSIONS_DIR.glob("*.md"):
+        try:
+            if now - file_path.stat().st_mtime > CONVERSION_TTL_SECONDS:
+                file_path.unlink()
+        except FileNotFoundError:
+            continue
+
+
+def get_conversion_path(conversion_id: str) -> Path:
+    return CONVERSIONS_DIR / f"{conversion_id}.md"
+
+
+def save_conversion(conversion_id: str, md_text: str) -> None:
+    CONVERSIONS_DIR.mkdir(parents=True, exist_ok=True)
+    get_conversion_path(conversion_id).write_text(md_text, encoding="utf-8")
+
+
+def load_conversion(conversion_id: str) -> str | None:
+    file_path = get_conversion_path(conversion_id)
+    if not file_path.exists():
+        return None
+
+    return file_path.read_text(encoding="utf-8")
 
 
 @app.route("/")
 def index():
+    cleanup_expired_conversions()
     return render_template("index.html")
 
 
 @app.route("/convert", methods=["POST"])
 def convert():
+    cleanup_expired_conversions()
     file = request.files.get("pdf")
     if not file or not file.filename.lower().endswith(".pdf"):
         return render_template("index.html", error="Please upload a valid PDF file."), 400
@@ -34,13 +68,14 @@ def convert():
             os.remove(tmp_path)
 
     conversion_id = uuid.uuid4().hex
-    conversions[conversion_id] = md_text
+    save_conversion(conversion_id, md_text)
     return redirect(url_for("result", conversion_id=conversion_id))
 
 
 @app.route("/result/<conversion_id>")
 def result(conversion_id):
-    md_text = conversions.get(conversion_id)
+    cleanup_expired_conversions()
+    md_text = load_conversion(conversion_id)
     if md_text is None:
         abort(404)
     html_body = markdown.markdown(md_text, extensions=["tables", "fenced_code"])
