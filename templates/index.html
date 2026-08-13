@@ -163,9 +163,23 @@
     ["dragover", "dragenter"].forEach(e => dropZone.addEventListener(e, ev => {
       ev.preventDefault(); dropZone.classList.add("drag-over");
     }));
-    ["dragleave", "drop"].forEach(e => dropZone.addEventListener(e, () => {
+      dropZone.addEventListener("dragleave", () => {
       dropZone.classList.remove("drag-over");
-    }));
+    });
+      dropZone.addEventListener("drop", ev => {
+        ev.preventDefault();
+        dropZone.classList.remove("drag-over");
+
+        const droppedFile = ev.dataTransfer.files[0];
+        if (!droppedFile) {
+          return;
+        }
+
+        const files = new DataTransfer();
+        files.items.add(droppedFile);
+        input.files = files.files;
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+      });
 
     form.addEventListener("submit", () => {
       const selectedFile = input.files[0];
