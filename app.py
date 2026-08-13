@@ -5,13 +5,19 @@ from pathlib import Path
 import markdown
 import pymupdf4llm
 from werkzeug.exceptions import RequestEntityTooLarge
-from flask import Flask, request, redirect, url_for, render_template, abort
+from flask import Flask, Response, request, redirect, url_for, render_template, abort
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 1 * 1024 * 1024  # 1 MB limit
 
 CONVERSION_TTL_SECONDS = 10 * 60
 CONVERSIONS_DIR = Path("/tmp/pdf2md-conversions")
+SITE_URL = os.environ.get("SITE_URL", "https://convert.schedulze.com").rstrip("/")
+
+
+@app.context_processor
+def inject_site_url():
+    return {"site_url": SITE_URL}
 
 
 def cleanup_expired_conversions() -> None:
@@ -53,6 +59,29 @@ def handle_file_too_large(_error):
 def index():
     cleanup_expired_conversions()
     return render_template("index.html")
+
+
+@app.route("/robots.txt")
+def robots():
+    return Response(
+        f"User-agent: *\nAllow: /\nSitemap: {SITE_URL}/sitemap.xml\n",
+        mimetype="text/plain",
+    )
+
+
+@app.route("/sitemap.xml")
+def sitemap():
+    return Response(
+        "\n".join(
+            [
+                '<?xml version="1.0" encoding="UTF-8"?>',
+                '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+                f"  <url><loc>{SITE_URL}/</loc></url>",
+                "</urlset>",
+            ]
+        ),
+        mimetype="application/xml",
+    )
 
 
 @app.route("/convert", methods=["POST"])
